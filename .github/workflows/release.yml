@@ -72,14 +72,29 @@ jobs:
         name: open_lights_bootstrap-${{ matrix.TARGET }}${{ matrix.EXTENSION }}
         path: open_lights_bootstrap-${{ matrix.TARGET }}${{ matrix.EXTENSION }}
 
-    - uses: svenstaro/upload-release-action@v2
-      name: Upload binaries to release
-      if: ${{ github.event_name == 'push' }}
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: open_lights_bootstrap-${{ matrix.TARGET }}${{ matrix.EXTENSION }}
-        asset_name: open_lights_bootstrap-${{ matrix.TARGET }}${{ matrix.EXTENSION }}
-        tag: ${{ github.ref }}
-        draft: true
-        prerelease: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        overwrite: true
+  upload_release:
+    permissions:
+      contents: write
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Retrieve Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: libs/
+          merge-multiple: true
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          tag_name: ${{ github.ref }}
+          prerelease: false
+          name: Open Lights Bootstrap ${{ github.ref }}
+          files: libs/*
+          generate_release_notes: true
+          overwrite: true
