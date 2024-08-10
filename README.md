@@ -1,0 +1,2 @@
+# OpenLightsBootstrap
+Loads the OpenLightsManager
