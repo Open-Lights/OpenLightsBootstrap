@@ -81,6 +81,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: 'Setup jq'
+        uses: dcarbone/install-jq-action@v2
+        with:
+          version: '1.7'
+          force: false
+
+      - name: Get version from Cargo.toml
+        id: get_version
+        run: echo "::set-output name=version::$(jq -r '.package.version' Cargo.toml)"
+
       - name: Retrieve Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -92,9 +102,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ steps.get_version.outputs.version }}
           prerelease: false
-          name: Open Lights Bootstrap ${{ github.ref }}
+          name: Open Lights Bootstrap ${{ steps.get_version.outputs.version }}
           files: libs/*
           generate_release_notes: true
           overwrite: true
